@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('projects', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->string('staffname');
-            $table->string('projectname');
-            $table->text('description');
-            $table->timestamps();
+        Schema::table('keys', function (Blueprint $table) {
+            $table->string('contains')->after('json_keys');
         });
     }
 
@@ -26,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('projects');
+        Schema::table('keys', function (Blueprint $table) {
+            //
+        });
     }
 };

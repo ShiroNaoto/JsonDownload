@@ -5,14 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Project extends Model
+class Key extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'staffname',
-        'projectname',
-        'description'
-    ];
+        'json_keys',
+        'contains',
+        'json_id'
+    ];    
 }

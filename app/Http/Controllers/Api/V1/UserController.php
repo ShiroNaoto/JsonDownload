@@ -24,25 +24,6 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    public function getAllRedisKeys()
-    {
-        $keys = Redis::keys('*');
-        $data = [];
-    
-        foreach ($keys as $key) {
-            $value = Redis::lrange($key, 0, -1);
-            $decodedValue = array_map(function ($value) {
-                return json_decode($value, true);
-            },$value);
-    
-            $data[] = [
-                'key' => $key,
-                'value' => $decodedValue !== null ? $decodedValue : $value,
-            ];
-        }
-        return response()->json($data);
-    }
-
     public function show(User $user){
         return new UserResource($user);
     }
@@ -55,27 +36,6 @@ class UserController extends Controller
             'message' => 'User Created!',
             'name' => $user->name,
             'token' => $token,
-        ]);
-    }
-
-    public function storeJson(Request $request)
-    {
-        $data = $request->json()->all();
-        $dateKey = 'json:' . now()->format('Y-m-d');
-        $jsonPayload = json_encode($data);
-        Redis::lpush($dateKey, $jsonPayload);
-
-        $storedValues = Redis::lrange($dateKey, 0, -1);
-        $decodedValues = array_map(function ($value) {
-            return json_decode($value, true);
-        }, $storedValues);
-
-        \Log::info('Stored JSON in Redis:', [$dateKey => $decodedValues]);
-
-        return response()->json([
-            'message' => 'JSON stored successfully',
-            'redis_key' => $dateKey,
-            'data' => $decodedValues,
         ]);
     }
 
@@ -95,28 +55,5 @@ class UserController extends Controller
     {
         $user->delete();
         return response()->json("User Deleted!");
-    }
-
-    public function downloadRedisKey($key)
-    {
-        $value = Redis::lrange($key, 0, -1);
-        $decodedValue = array_map(function ($value) {
-            return json_decode($value, true);
-        }, $value);
-
-        $data = [
-            'key' => $key,
-            'value' => $decodedValue !== null ? $decodedValue : $value,
-        ];
-
-        $fileName = $key . '.json';
-        $jsonContent = json_encode($data, JSON_PRETTY_PRINT);
-
-        return response()->streamDownload(function() use ($jsonContent) {
-            echo $jsonContent;
-        }, $fileName, [
-            'Content-Type' => 'application/json',
-            'Content-Disposition' => 'attachment; filename="'.$fileName.'"',
-        ]);
     }
 }
